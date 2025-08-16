@@ -71,11 +71,6 @@ Below are optional one-liners you can run yourself if not using scripts. Prefer 
 
 ---
 
-## Publish to GitHub Pages
-This page lives under `docs/` so GitHub Pages can serve it from the `main` branch. After pushing:
-- In your repository settings, enable Pages: Source = Deploy from a branch, Branch = `main`, Folder = `/docs`
-- The workshop will be available at: `https://<your-github-username>.github.io/<repo-name>/`
-
 ## Repo map for this workshop
 - APIs: `leave_app/api`, `timesheet_app/api`
 - MCP servers: `leave_app/mcp_server`, `timesheet_app/mcp_server`
