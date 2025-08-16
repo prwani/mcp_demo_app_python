@@ -2,7 +2,7 @@
 
 This repository contains a comprehensive demonstration solution for **Model Context Protocol (MCP)** showcasing all three core MCP capabilities: **Tools**, **Prompts**, and **Resources**. Built with Python and designed for Azure deployment.
 
-> Workshop: Step-by-step labs for deploying APIs, MCP servers, and the chat client (Option 1) are in `docs/index.md`. When published with GitHub Pages, the workshop is available at `https://<your-username>.github.io/<repo-name>/`.
+> Workshop: Step-by-step labs for deploying APIs, MCP servers, and the chat client (Option 1) are in `docs/index.md`. When published with GitHub Pages, the workshop is available at `https://prwani.github.io/mcp_demo_app_python/`.
 
 ## 🎯 MCP Capabilities Demonstrated
 
