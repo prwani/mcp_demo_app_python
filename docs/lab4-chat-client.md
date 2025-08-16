@@ -5,6 +5,14 @@ nav_order: 4
 
 # Lab 4 — MCP Chat Client
 
+<div class="suffix-picker">
+  <label for="suffix-input"><strong>Enter your SUFFIX</strong> (e.g., 7859): </label>
+  <input id="suffix-input" type="text" placeholder="7859" style="width: 8em; margin-left: 0.5rem;" />
+  <p style="margin-top: 0.5rem; font-size: 0.9em; color: #555;">Examples and curl commands on this page substitute <code>&lt;SUFFIX&gt;</code> with your value.</p>
+</div>
+
+<script src="./assets/suffix.js"></script>
+
 Concepts
 - Discovery: client queries `/mcp/tools/list`, `/mcp/prompts/list`, `/mcp/resources/list` on both servers
 - Orchestration: `/chat` endpoint parses intent and invokes MCP tools/resources
@@ -15,6 +23,10 @@ Steps
 1) Package & deploy the Chat Client via `scripts/deploy_mcp_zip.sh`
 2) Wire it to Leave/Timesheet MCP URLs via app settings
 3) Test flows from the web UI
+
+What you’ll do next (details)
+- The script sets `LEAVE_MCP_URL`, `TIMESHEET_MCP_URL`, and `WEBSITES_PORT=8000`
+- Optionally pass Azure OpenAI env for intent parsing: `AOAI_ENDPOINT`, `AOAI_KEY`, `AOAI_API_VERSION`, `AOAI_DEPLOYMENT`
 
 Commands
 

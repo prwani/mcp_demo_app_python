@@ -5,6 +5,14 @@ nav_order: 3
 
 # Lab 3 — Timesheet MCP Server
 
+<div class="suffix-picker">
+  <label for="suffix-input"><strong>Enter your SUFFIX</strong> (e.g., 7859): </label>
+  <input id="suffix-input" type="text" placeholder="7859" style="width: 8em; margin-left: 0.5rem;" />
+  <p style="margin-top: 0.5rem; font-size: 0.9em; color: #555;">Examples and curl commands on this page substitute <code>&lt;SUFFIX&gt;</code> with your value.</p>
+</div>
+
+<script src="./assets/suffix.js"></script>
+
 Concepts (from README)
 - Tools (Timesheet):
   - `add_timesheet_entry` — POST `/mcp/tools/add_timesheet_entry` → proxies to Timesheet API `/employees/{id}/entries`
@@ -24,6 +32,11 @@ Steps
 1) Package & deploy the Timesheet MCP server via `scripts/deploy_mcp_zip.sh`
 2) Configure it to call your Timesheet API via `TIMESHEET_API_URL`
 3) Validate `/mcp/health` and capability discovery
+
+What you’ll do next (details)
+- Creates `timesheet_mcp.zip` from `timesheet_app/` excluding API/web/sql
+- Sets `TIMESHEET_API_URL` to your Timesheet API URL
+- Sets port 8012 and startup script, deploys, restarts
 
 Commands
 
