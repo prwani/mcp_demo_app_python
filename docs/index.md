@@ -58,6 +58,11 @@ You’ll first review core concepts for each lab, then run the exact commands (u
 - [Lab 2 — Leave MCP Server (Option 1)](./lab2-leave-mcp.md)
 - [Lab 3 — Timesheet MCP Server (Option 1)](./lab3-timesheet-mcp.md)
 - [Lab 4 — MCP Chat Client (Option 1)](./lab4-chat-client.md)
+- [Lab 5 — Use VS Code with Leave & Timesheet MCP servers](./lab5-vscode-mcp.md)
+- [Lab 6 — Build MCP servers with Azure API Management (from Lab 1 APIs)](./lab6-apim-mcp.md)
+- [Lab 7 — Use VS Code with APIM-hosted MCP servers](./lab7-vscode-apim-mcp.md)
+- [Lab 8 — Use Leave & Timesheet MCP in Microsoft 365 Copilot (Preview)](./lab8-m365-copilot.md)
+- [Lab 9 — Use APIM-based MCP in Microsoft 365 Copilot (Preview)](./lab9-m365-copilot-apim.md)
 
 ---
 
