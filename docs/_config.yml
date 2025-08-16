@@ -5,7 +5,7 @@ color_scheme: nil
 search_enabled: true
 aux_links:
   Repository:
-    - https://github.com/prwani/MCP-workshop
+    - https://github.com/prwani/mcp_demo_app_python/
 plugins:
   - jekyll-seo-tag
 markdown: kramdown
