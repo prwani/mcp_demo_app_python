@@ -18,6 +18,19 @@ You’ll first review core concepts for each lab, then run the exact commands (u
 - Python 3.10+
 - Optional: Azure OpenAI (for enhanced intent detection in chat)
 
+### MCP Inspector (optional but recommended)
+Use MCP Inspector to explore and validate MCP servers (browse Tools, Prompts, and Resources) during Labs 2–4.
+
+- Windows
+  1) Download and install the MCP Inspector desktop app from the official releases page.
+  2) Launch the app, select Add server, and paste your MCP base URL (you’ll use the URLs in Labs 2 and 3).
+  3) You can browse Tools, Prompts, and Resources, and try invoking tools.
+
+- WSL (Ubuntu)
+  1) Install Node.js 18+ (for example via nvm), then in WSL you can run the Inspector’s local server or use the Windows desktop app.
+  2) If using the local server variant, start it per the Inspector’s README, then open the UI in your browser and add your MCP server URLs.
+  3) Alternatively, run the Windows desktop app and point it at your MCP URLs.
+
 ## Overview
 
 ### MCP capabilities in this repo

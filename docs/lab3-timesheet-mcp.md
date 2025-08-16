@@ -44,6 +44,15 @@ Commands
 SUFFIX=&lt;SUFFIX&gt; DO_LEAVE=0 DO_TIMESHEET=1 DO_CHAT=0 ./scripts/deploy_mcp_zip.sh
 "></code></pre>
 
+## Use MCP Inspector (optional)
+- Start MCP Inspector (Windows desktop app or WSL variant).
+- Add a server with the base URL:
+  - <span data-suffix-bind data-template="https://mcp-timesheet-mcp-<SUFFIX>.azurewebsites.net"></span>
+- Inspect capabilities:
+  - Tools: expect `add_timesheet_entry`, `list_timesheet_entries` under `/mcp/tools/...`
+  - Prompts: see `/mcp/prompts/list` and prompt details
+  - Resources: browse `/mcp/resources/list` and read entries
+
 Validate
 - Health: <span data-suffix-bind data-template="https://mcp-timesheet-mcp-<SUFFIX>.azurewebsites.net/mcp/health"></span>
 - Tools: <span data-suffix-bind data-template="https://mcp-timesheet-mcp-<SUFFIX>.azurewebsites.net/mcp/tools/list"></span>

@@ -43,6 +43,15 @@ Commands
 SUFFIX=&lt;SUFFIX&gt; ONLY_LEAVE=1 ./scripts/deploy_mcp_zip.sh
 "></code></pre>
 
+## Use MCP Inspector (optional)
+- Start MCP Inspector (Windows desktop app or WSL variant).
+- Add a server with the base URL:
+  - <span data-suffix-bind data-template="https://mcp-leave-mcp-<SUFFIX>.azurewebsites.net"></span>
+- Inspect capabilities:
+  - Tools: expect `apply_leave`, `get_balance` under `/mcp/tools/...`
+  - Prompts: see `/mcp/prompts/list` and prompt details
+  - Resources: browse `/mcp/resources/list` and read entries
+
 Validate
 - Health: <span data-suffix-bind data-template="https://mcp-leave-mcp-<SUFFIX>.azurewebsites.net/mcp/health"></span>
 - Tools: <span data-suffix-bind data-template="https://mcp-leave-mcp-<SUFFIX>.azurewebsites.net/mcp/tools/list"></span>
