@@ -1,0 +1,209 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Leave App</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<style>
+			:root { --bg:#0b1020; --card:#121733; --muted:#9aa4bf; --text:#e6edff; --accent:#5b8cff; --ok:#19c37d; --err:#ff6b6b }
+			body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);max-width:980px;margin:24px auto;padding:0 16px}
+			h1{margin:8px 0 20px}
+			.grid{display:grid;grid-template-columns:1fr;gap:16px}
+			@media (min-width:900px){.grid{grid-template-columns:1fr 1fr}}
+			.card{background:var(--card);border:1px solid #222b55;border-radius:12px;padding:16px}
+			label{display:block;font-size:12px;color:var(--muted);margin-top:8px}
+			input,select,button{padding:10px 12px;margin-top:6px;border-radius:8px;border:1px solid #2a3466;background:#0f1430;color:var(--text)}
+			button{background:linear-gradient(135deg,#4b6bff,#5b8cff);border:none;cursor:pointer}
+			button.secondary{background:#0f1430;border:1px solid #2a3466}
+			button.danger{background:linear-gradient(135deg,#ff5b5b,#ff7b7b)}
+			.row{display:flex;gap:8px;flex-wrap:wrap}
+			.muted{color:var(--muted)}
+			.msg{white-space:pre-wrap;background:#0f1430;border:1px solid #2a3466;border-radius:8px;padding:8px;margin-top:10px;max-height:220px;overflow:auto}
+			.list{margin-top:8px}
+			.item{border:1px solid #2a3466;border-radius:8px;padding:10px;margin:8px 0;background:#0f1430}
+			.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;border:1px solid #2a3466;color:var(--muted)}
+		</style>
+	</head>
+	<body>
+		<h1>Leave Application</h1>
+
+		<div class="grid">
+			<section class="card">
+				<h3>Create Employee</h3>
+				<label>Name</label>
+				<input id="empName" placeholder="Jane Doe" />
+				<label>Email</label>
+				<input id="empEmail" placeholder="jane@example.com" />
+				<div class="row">
+					<div>
+						<label>Initial Annual Balance</label>
+						<input id="empAnnual" type="number" min="0" value="20" />
+					</div>
+					<div>
+						<label>Initial Sick Balance</label>
+						<input id="empSick" type="number" min="0" value="10" />
+					</div>
+				</div>
+				<div class="row">
+					<button id="btnCreate">Create</button>
+					<button id="btnLoad" class="secondary">Refresh Employees</button>
+				</div>
+				<div class="msg" id="empOut"></div>
+			</section>
+
+			<section class="card">
+				<h3>Employees & Balance</h3>
+				<label>Employee</label>
+				<select id="employeeSelect"></select>
+				<div class="row">
+					<button id="btnBalance">Get Balance</button>
+					<button id="btnListReq" class="secondary">List Requests</button>
+				</div>
+				<div class="msg" id="balanceOut"></div>
+			</section>
+
+			<section class="card">
+				<h3>Request Leave</h3>
+				<div class="row">
+					<div>
+						<label>Start</label>
+						<input id="start" type="date" />
+					</div>
+					<div>
+						<label>End</label>
+						<input id="end" type="date" />
+					</div>
+					<div>
+						<label>Type</label>
+						<select id="ltype"><option>annual</option><option>sick</option></select>
+					</div>
+				</div>
+				<label>Reason</label>
+				<input id="reason" placeholder="Optional" />
+				<button id="btnApply">Apply</button>
+				<div class="msg" id="leaveOut"></div>
+			</section>
+
+			<section class="card">
+				<h3>Leave Requests</h3>
+				<div id="requests" class="list"></div>
+			</section>
+		</div>
+
+		<p class="muted">API base: relative to this page (served by the Leave API).</p>
+
+		<script>
+			const sel = document.getElementById('employeeSelect');
+			const empOut = document.getElementById('empOut');
+			const balOut = document.getElementById('balanceOut');
+			const leaveOut = document.getElementById('leaveOut');
+			const requestsDiv = document.getElementById('requests');
+
+			function msg(el, data){
+				try{ el.textContent = JSON.stringify(data, null, 2) }
+				catch{ el.textContent = String(data) }
+			}
+
+			async function loadEmployees(){
+				const r = await fetch('/employees');
+				if(!r.ok){ msg(empOut, await r.text()); return; }
+				const list = await r.json();
+				sel.innerHTML = '';
+				for(const e of list){
+					const o = document.createElement('option');
+					o.value = e.id; o.textContent = `${e.id} · ${e.name} <${e.email}>`;
+					sel.appendChild(o);
+				}
+				if(list.length===0){
+					const o = document.createElement('option');
+					o.value=''; o.textContent='No employees yet'; sel.appendChild(o);
+				}
+			}
+
+			async function createEmp(){
+				const name = document.getElementById('empName').value.trim();
+				const email = document.getElementById('empEmail').value.trim();
+				const annual = Number(document.getElementById('empAnnual').value);
+				const sick = Number(document.getElementById('empSick').value);
+				if(!name || !email){ msg(empOut,{error:'Name and email required'}); return }
+				const r = await fetch('/employees',{
+					method:'POST', headers:{'Content-Type':'application/json'},
+					body: JSON.stringify({ name, email, annual_balance: annual, sick_balance: sick })
+				});
+				const t = r.headers.get('content-type')?.includes('application/json') ? await r.json() : await r.text();
+				msg(empOut, t);
+				if(r.ok){ await loadEmployees(); }
+			}
+
+			async function showBalance(){
+				if(!sel.value){ msg(balOut,{error:'Select an employee'}); return }
+				const r = await fetch(`/employees/${sel.value}/balance`);
+				const t = r.headers.get('content-type')?.includes('application/json') ? await r.json() : await r.text();
+				msg(balOut, t);
+			}
+
+			async function applyLeave(){
+				if(!sel.value){ msg(leaveOut,{error:'Select an employee'}); return }
+				const start = document.getElementById('start').value;
+				const end = document.getElementById('end').value;
+				const leave_type = document.getElementById('ltype').value;
+				const reason = document.getElementById('reason').value || null;
+				if(!start || !end){ msg(leaveOut,{error:'Start and end required'}); return }
+				const r = await fetch(`/employees/${sel.value}/leave-requests`,{
+					method:'POST', headers:{'Content-Type':'application/json'},
+					body: JSON.stringify({ start_date:start, end_date:end, leave_type, reason })
+				});
+				const t = r.headers.get('content-type')?.includes('application/json') ? await r.json() : await r.text();
+				msg(leaveOut, t);
+				if(r.ok){ await listRequests(); await showBalance(); }
+			}
+
+			function requestItem(req){
+				const d = document.createElement('div'); d.className='item';
+				d.innerHTML = `
+					<div class="row" style="justify-content:space-between;align-items:center">
+						<div>
+							<div><strong>#${req.id}</strong> ${req.start_date} → ${req.end_date} · <span class="badge">${req.leave_type}</span></div>
+							<div class="muted">${req.reason || ''}</div>
+						</div>
+						<div>
+							<span class="badge" style="margin-right:8px">${req.status}</span>
+							<button class="secondary" data-id="${req.id}" data-status="approved">Approve</button>
+							<button class="danger" data-id="${req.id}" data-status="rejected">Reject</button>
+						</div>
+					</div>`;
+				d.querySelectorAll('button').forEach(b=>{
+					b.addEventListener('click', async () => {
+						const id = b.getAttribute('data-id');
+						const status = b.getAttribute('data-status');
+						const r = await fetch(`/leave-requests/${id}/status`,{
+							method:'POST', headers:{'Content-Type':'application/json'},
+							body: JSON.stringify({ status })
+						});
+						if(!r.ok){ alert(await r.text()); return }
+						await listRequests(); await showBalance();
+					});
+				});
+				return d;
+			}
+
+			async function listRequests(){
+				requestsDiv.innerHTML = '';
+				if(!sel.value) return;
+				const r = await fetch(`/employees/${sel.value}/leave-requests`);
+				if(!r.ok){ requestsDiv.textContent = await r.text(); return }
+				const list = await r.json();
+				if(list.length === 0){ requestsDiv.textContent = 'No requests yet.'; return }
+				list.forEach(req => requestsDiv.appendChild(requestItem(req)));
+			}
+
+			document.getElementById('btnCreate').addEventListener('click', createEmp);
+			document.getElementById('btnLoad').addEventListener('click', loadEmployees);
+			document.getElementById('btnBalance').addEventListener('click', showBalance);
+			document.getElementById('btnApply').addEventListener('click', applyLeave);
+			document.getElementById('btnListReq').addEventListener('click', listRequests);
+
+			loadEmployees();
+		</script>
+	</body>
+	</html>

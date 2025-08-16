@@ -1,0 +1,15 @@
+title: MCP Workshop
+description: Build and deploy Leave & Timesheet APIs, MCP servers, and an MCP chat client on Azure (Option 1)
+remote_theme: just-the-docs/just-the-docs
+color_scheme: nil
+search_enabled: true
+aux_links:
+  Repository:
+    - https://github.com/prwani/MCP-workshop
+plugins:
+  - jekyll-seo-tag
+markdown: kramdown
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules

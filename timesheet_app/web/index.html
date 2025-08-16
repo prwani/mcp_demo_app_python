@@ -1,0 +1,161 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Timesheet App</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<style>
+			:root { --bg:#0b1020; --card:#121733; --muted:#9aa4bf; --text:#e6edff; --accent:#5b8cff }
+			body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);max-width:980px;margin:24px auto;padding:0 16px}
+			h1{margin:8px 0 20px}
+			.grid{display:grid;grid-template-columns:1fr;gap:16px}
+			@media (min-width:900px){.grid{grid-template-columns:1fr 1fr}}
+			.card{background:var(--card);border:1px solid #222b55;border-radius:12px;padding:16px}
+			label{display:block;font-size:12px;color:var(--muted);margin-top:8px}
+			input,select,button{padding:10px 12px;margin-top:6px;border-radius:8px;border:1px solid #2a3466;background:#0f1430;color:var(--text)}
+			button{background:linear-gradient(135deg,#4b6bff,#5b8cff);border:none;cursor:pointer}
+			button.secondary{background:#0f1430;border:1px solid #2a3466}
+			.row{display:flex;gap:8px;flex-wrap:wrap}
+			.msg{white-space:pre-wrap;background:#0f1430;border:1px solid #2a3466;border-radius:8px;padding:8px;margin-top:10px;max-height:220px;overflow:auto}
+			.list{margin-top:8px}
+			.item{border:1px solid #2a3466;border-radius:8px;padding:10px;margin:8px 0;background:#0f1430}
+			.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;border:1px solid #2a3466;color:var(--muted)}
+		</style>
+	</head>
+	<body>
+		<h1>Timesheet Application</h1>
+		<div class="grid">
+			<section class="card">
+				<h3>Create Employee</h3>
+				<label>Name</label>
+				<input id="empName" placeholder="Jane Doe" />
+				<label>Email</label>
+				<input id="empEmail" placeholder="jane@example.com" />
+				<div class="row">
+					<button id="btnCreate">Create</button>
+					<button id="btnLoad" class="secondary">Refresh Employees</button>
+				</div>
+				<div class="msg" id="empOut"></div>
+			</section>
+			<section class="card">
+				<h3>Employees</h3>
+				<label>Employee</label>
+				<select id="employeeSelect"></select>
+				<div class="row">
+					<button id="btnList" class="secondary">List Entries</button>
+				</div>
+			</section>
+			<section class="card">
+				<h3>Add Entry</h3>
+				<div class="row">
+					<div>
+						<label>Date</label>
+						<input id="date" type="date" />
+					</div>
+					<div>
+						<label>Hours</label>
+						<input id="hours" type="number" min="0" max="24" value="8" />
+					</div>
+				</div>
+				<label>Project</label>
+				<input id="project" placeholder="Project (optional)" />
+				<label>Notes</label>
+				<input id="notes" placeholder="Notes (optional)" />
+				<button id="btnAdd">Add Entry</button>
+				<div class="msg" id="out"></div>
+			</section>
+			<section class="card">
+				<h3>Entries</h3>
+				<div id="entries" class="list"></div>
+			</section>
+		</div>
+
+		<p style="color:#9aa4bf">API base: relative to this page (served by the Timesheet API).</p>
+
+		<script>
+			const sel = document.getElementById('employeeSelect');
+			const empOut = document.getElementById('empOut');
+			const out = document.getElementById('out');
+			const entriesDiv = document.getElementById('entries');
+
+			function msg(el, data){
+				try{ el.textContent = JSON.stringify(data, null, 2) }
+				catch{ el.textContent = String(data) }
+			}
+
+			async function loadEmployees(){
+				const r = await fetch('/employees');
+				if(!r.ok){ msg(empOut, await r.text()); return; }
+				const list = await r.json();
+				sel.innerHTML = '';
+				for(const e of list){
+					const o = document.createElement('option');
+					o.value = e.id; o.textContent = `${e.id} · ${e.name} <${e.email}>`;
+					sel.appendChild(o);
+				}
+				if(list.length===0){
+					const o = document.createElement('option');
+					o.value=''; o.textContent='No employees yet'; sel.appendChild(o);
+				}
+			}
+
+			async function createEmp(){
+				const name = document.getElementById('empName').value.trim();
+				const email = document.getElementById('empEmail').value.trim();
+				if(!name || !email){ msg(empOut,{error:'Name and email required'}); return }
+				const r = await fetch('/employees',{
+					method:'POST', headers:{'Content-Type':'application/json'},
+					body: JSON.stringify({ name, email })
+				});
+				const t = r.headers.get('content-type')?.includes('application/json') ? await r.json() : await r.text();
+				msg(empOut, t);
+				if(r.ok){ await loadEmployees(); }
+			}
+
+			function entryItem(e){
+				const d = document.createElement('div'); d.className='item';
+				d.innerHTML = `
+					<div class="row" style="justify-content:space-between;align-items:center">
+						<div>
+							<div><strong>#${e.id}</strong> ${e.entry_date} · <span class="badge">${e.hours}h</span></div>
+							<div style="color:#9aa4bf">${e.project || ''} ${e.notes ? '· '+e.notes : ''}</div>
+						</div>
+					</div>`;
+				return d;
+			}
+
+			async function listEntries(){
+				entriesDiv.innerHTML = '';
+				if(!sel.value) return;
+				const r = await fetch(`/employees/${sel.value}/entries`);
+				if(!r.ok){ entriesDiv.textContent = await r.text(); return }
+				const list = await r.json();
+				if(list.length === 0){ entriesDiv.textContent = 'No entries yet.'; return }
+				list.forEach(e => entriesDiv.appendChild(entryItem(e)));
+			}
+
+			async function addEntry(){
+				if(!sel.value){ msg(out,{error:'Select an employee'}); return }
+				const entry_date = document.getElementById('date').value;
+				const hours = Number(document.getElementById('hours').value);
+				const project = document.getElementById('project').value || null;
+				const notes = document.getElementById('notes').value || null;
+				if(!entry_date){ msg(out,{error:'Date required'}); return }
+				const r = await fetch(`/employees/${sel.value}/entries`,{
+					method:'POST', headers:{'Content-Type':'application/json'},
+					body: JSON.stringify({ entry_date, hours, project, notes })
+				});
+				const t = r.headers.get('content-type')?.includes('application/json') ? await r.json() : await r.text();
+				msg(out, t);
+				if(r.ok){ await listEntries(); }
+			}
+
+			document.getElementById('btnCreate').addEventListener('click', createEmp);
+			document.getElementById('btnLoad').addEventListener('click', loadEmployees);
+			document.getElementById('btnList').addEventListener('click', listEntries);
+			document.getElementById('btnAdd').addEventListener('click', addEntry);
+
+			loadEmployees();
+		</script>
+	</body>
+	</html>

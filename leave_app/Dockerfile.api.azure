@@ -1,0 +1,21 @@
+FROM python:3.10-slim
+
+# Install Microsoft ODBC Driver for SQL Server (Debian 12 signed-by keyring)
+RUN apt-get update && apt-get install -y curl gnupg ca-certificates \
+    && mkdir -p /usr/share/keyrings \
+    && curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg \
+    && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/debian/12/prod bookworm main" > /etc/apt/sources.list.d/microsoft-prod.list \
+    && apt-get update && ACCEPT_EULA=Y apt-get install -y msodbcsql18 unixodbc-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONPATH=/app
+WORKDIR /app
+
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+# Add pyodbc for Azure SQL
+RUN pip install pyodbc
+
+COPY leave_app /app/leave_app
+EXPOSE 8001
+CMD ["uvicorn","leave_app.api.main:app","--host","0.0.0.0","--port","8001"]

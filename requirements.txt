@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+gunicorn
+openai
+sqlalchemy
+pydantic
+requests
+pyodbc  # needed only for Azure SQL via ODBC

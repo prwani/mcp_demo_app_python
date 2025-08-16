@@ -1,0 +1,230 @@
+#!/usr/bin/env bash
+# Safer bash settings but allow per-step error handling to continue across components
+set -uo pipefail
+
+# Deploy Leave MCP, Timesheet MCP, and Chat Client via Zip Deploy to Azure Web Apps
+# Usage:
+#   SUFFIX=7859 REGION=eastus2 ./scripts/deploy_mcp_zip.sh
+#
+# Optional (will be set if present): AOAI_ENDPOINT, AOAI_KEY, AOAI_API_VERSION, AOAI_DEPLOYMENT
+
+if [[ -z "${SUFFIX:-}" ]]; then
+  echo "Error: SUFFIX is required (e.g., 7859)" >&2
+  echo "Usage: SUFFIX=7859 $0" >&2
+  exit 1
+fi
+
+echo "Using SUFFIX: $SUFFIX"
+
+RG="mcp-python-demo-rg-${SUFFIX}"
+ASP_NAME="mcp-demo-asp-${SUFFIX}"
+LEAVE_API_APP="mcp-leave-api-${SUFFIX}"
+TIMESHEET_API_APP="mcp-timesheet-api-${SUFFIX}"
+LEAVE_MCP_APP="mcp-leave-mcp-${SUFFIX}"
+TIMESHEET_MCP_APP="mcp-timesheet-mcp-${SUFFIX}"
+CHAT_CLIENT_APP="mcp-chat-client-${SUFFIX}"
+
+echo "Deploying to Resource Group: ${RG}"
+
+# Ensure az is logged in
+if ! az account show >/dev/null 2>&1; then
+  echo "Please run 'az login' first." >&2
+  exit 1
+fi
+
+# Helpers
+run_cmd() {
+  # Run a command and return 0/1, suppressing set -e behavior
+  # Usage: run_cmd <desc> <cmd...>
+  local desc="$1"; shift
+  echo "→ ${desc}"
+  if "$@" >/dev/null; then
+    echo "  ✓ ${desc}"
+    return 0
+  else
+    echo "  ✗ ${desc}"
+    return 1
+  fi
+}
+
+create_app_if_needed() {
+  local appname="$1"
+  if ! az webapp show -g "$RG" -n "$appname" >/dev/null 2>&1; then
+    run_cmd "Create Web App ${appname}" az webapp create -g "$RG" -p "$ASP_NAME" -n "$appname" --runtime "PYTHON|3.10"
+  else
+    echo "Web App exists: ${appname}"
+    return 0
+  fi
+}
+
+# Build zips once (using same pattern as working APIs)
+echo "Packaging zip artifacts..."
+pushd "$(dirname "$0")/.." >/dev/null
+
+ROOT_DIR="$(pwd)"
+
+# Create filtered requirements.txt without pyodbc for MCP servers
+sed '/^\s*pyodbc\b/d' requirements.txt > requirements_mcp.txt
+
+# Package zips similar to option_1_setup.md pattern
+zip -qr leave_mcp.zip leave_app requirements_mcp.txt oryx.ini
+if [[ ! -f "leave_mcp.zip" ]]; then
+  echo "Error: Failed to create leave_mcp.zip" >&2
+  exit 1
+fi
+
+zip -qr timesheet_mcp.zip timesheet_app requirements_mcp.txt oryx.ini
+if [[ ! -f "timesheet_mcp.zip" ]]; then
+  echo "Error: Failed to create timesheet_mcp.zip" >&2
+  exit 1
+fi
+
+zip -qr chat_client.zip chat_client requirements_mcp.txt oryx.ini
+if [[ ! -f "chat_client.zip" ]]; then
+  echo "Error: Failed to create chat_client.zip" >&2
+  exit 1
+fi
+
+echo "✓ All zip files created successfully (including startup.sh files)"
+
+ZIP_LEAVE_MCP="leave_mcp.zip"
+ZIP_TIMESHEET_MCP="timesheet_mcp.zip"
+ZIP_CHAT="chat_client.zip"
+
+ROOT_ZIP_DIR="$ROOT_DIR"
+popd >/dev/null
+
+# Track results
+declare -A RESULTS
+RESULTS[leave_mcp]="FAILED"
+RESULTS[timesheet_mcp]="FAILED"
+RESULTS[chat_client]="FAILED"
+
+# Deploy Leave MCP
+echo -e "\n=== Deploy: Leave MCP (${LEAVE_MCP_APP}) ==="
+leave_ok=true
+create_app_if_needed "$LEAVE_MCP_APP" || leave_ok=false
+run_cmd "Set app settings (Leave MCP)" \
+  az webapp config appsettings set -g "$RG" -n "$LEAVE_MCP_APP" --settings \
+  LEAVE_API_URL="https://${LEAVE_API_APP}.azurewebsites.net" \
+  WEBSITES_PORT="8011" \
+  PORT="8011" \
+  SCM_DO_BUILD_DURING_DEPLOYMENT="1" \
+  ENABLE_ORYX_BUILD="1" \
+  ORYX_PYTHON_VERSION="3.10" \
+  PYTHON_VERSION="3.10" \
+  DISABLE_COLLECTSTATIC="1" \
+  WEBSITE_ENABLE_SYNC_UPDATE_SITE="1" || leave_ok=false
+run_cmd "Set startup (Leave MCP)" \
+  az webapp config set -g "$RG" -n "$LEAVE_MCP_APP" --startup-file "leave_app/startup.sh" || leave_ok=false
+run_cmd "Zip deploy (Leave MCP)" \
+  az webapp deploy -g "$RG" -n "$LEAVE_MCP_APP" --src-path "$ROOT_ZIP_DIR/$ZIP_LEAVE_MCP" --type zip || leave_ok=false
+run_cmd "Restart Leave MCP app" \
+  az webapp restart -g "$RG" -n "$LEAVE_MCP_APP" || leave_ok=false
+if $leave_ok; then RESULTS[leave_mcp]="SUCCEEDED"; fi
+
+echo "  Waiting 10s to avoid SCM restart conflicts..."
+sleep 10
+
+echo -e "\n=== Deploy: Timesheet MCP (${TIMESHEET_MCP_APP}) ==="
+echo "  Waiting 30s between components to avoid conflicts..."
+sleep 30
+timesheet_ok=true
+create_app_if_needed "$TIMESHEET_MCP_APP" || timesheet_ok=false
+run_cmd "Set app settings (Timesheet MCP)" \
+  az webapp config appsettings set -g "$RG" -n "$TIMESHEET_MCP_APP" --settings \
+  TIMESHEET_API_URL="https://${TIMESHEET_API_APP}.azurewebsites.net" \
+  WEBSITES_PORT="8012" \
+  PORT="8012" \
+  SCM_DO_BUILD_DURING_DEPLOYMENT="1" \
+  ENABLE_ORYX_BUILD="1" \
+  ORYX_PYTHON_VERSION="3.10" \
+  PYTHON_VERSION="3.10" \
+  DISABLE_COLLECTSTATIC="1" \
+  WEBSITE_ENABLE_SYNC_UPDATE_SITE="1" || timesheet_ok=false
+run_cmd "Set startup (Timesheet MCP)" \
+  az webapp config set -g "$RG" -n "$TIMESHEET_MCP_APP" --startup-file "timesheet_app/startup.sh" || timesheet_ok=false
+run_cmd "Zip deploy (Timesheet MCP)" \
+  az webapp deploy -g "$RG" -n "$TIMESHEET_MCP_APP" --src-path "$ROOT_ZIP_DIR/$ZIP_TIMESHEET_MCP" --type zip || timesheet_ok=false
+run_cmd "Restart Timesheet MCP app" \
+  az webapp restart -g "$RG" -n "$TIMESHEET_MCP_APP" || timesheet_ok=false
+if $timesheet_ok; then RESULTS[timesheet_mcp]="SUCCEEDED"; fi
+
+echo "  Waiting 10s to avoid SCM restart conflicts..."
+sleep 10
+
+echo -e "\n=== Deploy: MCP Chat Client (${CHAT_CLIENT_APP}) ==="
+echo "  Waiting 30s between components to avoid conflicts..."
+sleep 30
+chat_ok=true
+create_app_if_needed "$CHAT_CLIENT_APP" || chat_ok=false
+
+CHAT_SETTINGS=(
+  "LEAVE_MCP_URL=https://${LEAVE_MCP_APP}.azurewebsites.net"
+  "TIMESHEET_MCP_URL=https://${TIMESHEET_MCP_APP}.azurewebsites.net"
+  "WEBSITES_PORT=8000"
+  "PORT=8000"
+)
+if [[ -n "${AOAI_ENDPOINT:-}" ]]; then CHAT_SETTINGS+=("AZURE_OPENAI_ENDPOINT=${AOAI_ENDPOINT}"); fi
+if [[ -n "${AOAI_KEY:-}" ]]; then CHAT_SETTINGS+=("AZURE_OPENAI_KEY=${AOAI_KEY}"); fi
+if [[ -n "${AOAI_API_VERSION:-}" ]]; then CHAT_SETTINGS+=("AZURE_OPENAI_API_VERSION=${AOAI_API_VERSION}"); fi
+if [[ -n "${AOAI_DEPLOYMENT:-}" ]]; then CHAT_SETTINGS+=("AZURE_OPENAI_DEPLOYMENT=${AOAI_DEPLOYMENT}"); fi
+
+run_cmd "Set app settings (Chat Client)" \
+  az webapp config appsettings set -g "$RG" -n "$CHAT_CLIENT_APP" --settings "${CHAT_SETTINGS[@]}" || chat_ok=false
+# Ensure Oryx build flags on Chat Client too
+run_cmd "Enable Oryx build (Chat Client)" \
+  az webapp config appsettings set -g "$RG" -n "$CHAT_CLIENT_APP" --settings \
+  SCM_DO_BUILD_DURING_DEPLOYMENT="1" \
+  ENABLE_ORYX_BUILD="1" \
+  ORYX_PYTHON_VERSION="3.10" \
+  PYTHON_VERSION="3.10" \
+  DISABLE_COLLECTSTATIC="1" \
+  WEBSITE_ENABLE_SYNC_UPDATE_SITE="1" || chat_ok=false
+run_cmd "Set startup (Chat Client)" \
+  az webapp config set -g "$RG" -n "$CHAT_CLIENT_APP" --startup-file "chat_client/startup.sh" || chat_ok=false
+run_cmd "Zip deploy (Chat Client)" \
+  az webapp deploy -g "$RG" -n "$CHAT_CLIENT_APP" --src-path "$ROOT_ZIP_DIR/$ZIP_CHAT" --type zip || chat_ok=false
+run_cmd "Restart Chat Client app" \
+  az webapp restart -g "$RG" -n "$CHAT_CLIENT_APP" || chat_ok=false
+if $chat_ok; then RESULTS[chat_client]="SUCCEEDED"; fi
+
+echo -e "\n=== Deployment Summary ==="
+printf "%-18s : %s\n" "Leave MCP" "${RESULTS[leave_mcp]}"
+printf "%-18s : %s\n" "Timesheet MCP" "${RESULTS[timesheet_mcp]}"
+printf "%-18s : %s\n" "MCP Chat Client" "${RESULTS[chat_client]}"
+
+echo -e "\nEndpoints:"
+echo "  Leave MCP:      https://${LEAVE_MCP_APP}.azurewebsites.net/mcp/health"
+echo "  Timesheet MCP:  https://${TIMESHEET_MCP_APP}.azurewebsites.net/mcp/health"
+echo "  Chat Client:    https://${CHAT_CLIENT_APP}.azurewebsites.net/health (UI at /)"
+
+echo -e "\nTesting endpoints (waiting 30s for startup)..."
+sleep 30
+
+# Test endpoints
+echo "Testing Leave MCP health..."
+if curl -s "https://${LEAVE_MCP_APP}.azurewebsites.net/mcp/health" >/dev/null 2>&1; then
+  echo "  ✓ Leave MCP is responding"
+else
+  echo "  ✗ Leave MCP is not responding yet"
+fi
+
+echo "Testing Timesheet MCP health..."
+if curl -s "https://${TIMESHEET_MCP_APP}.azurewebsites.net/mcp/health" >/dev/null 2>&1; then
+  echo "  ✓ Timesheet MCP is responding"
+else
+  echo "  ✗ Timesheet MCP is not responding yet"
+fi
+
+echo "Testing Chat Client health..."
+if curl -s "https://${CHAT_CLIENT_APP}.azurewebsites.net/health" >/dev/null 2>&1; then
+  echo "  ✓ Chat Client is responding"
+else
+  echo "  ✗ Chat Client is not responding yet"
+fi
+
+# Cleanup zip files
+echo -e "\nCleaning up zip files..."
+rm -f leave_mcp.zip timesheet_mcp.zip chat_client.zip requirements_mcp.txt
+echo "✓ Cleanup completed"

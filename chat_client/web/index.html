@@ -1,0 +1,181 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>MCP Chat Client - Enhanced with Tools, Prompts & Resources</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: sans-serif; max-width: 900px; margin: 20px auto; padding: 0 12px; }
+        input, button, select { padding: 8px; margin: 4px 0; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .examples { background: #f0f8ff; }
+        .capabilities { background: #f8f8f0; }
+        #log { white-space: pre-wrap; background: #f9f9f9; padding: 12px; border-radius: 8px; max-height: 400px; overflow-y: auto; }
+        .small { font-size: 0.9em; color: #666; }
+        .button-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        code { background: #e8e8e8; padding: 2px 4px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>🤖 MCP Chat Client</h1>
+    <p>Enhanced demo showcasing <strong>Tools</strong>, <strong>Prompts</strong>, and <strong>Resources</strong> from MCP servers</p>
+    
+    <div class="section">
+        <h3>💬 Chat Interface</h3>
+        <input id="employee" placeholder="Employee ID (e.g., 1)" type="number">
+        <input id="text" placeholder="Your message..." style="width: 60%;">
+        <button onclick="send()">Send</button>
+        <div class="button-group">
+            <button onclick="discover()" class="small">🔍 Discover MCP Capabilities</button>
+        </div>
+    </div>
+
+    <div class="section examples">
+        <h3>💡 Example Messages</h3>
+        <div class="button-group">
+            <button onclick="tryExample('Apply leave 2025-08-20 to 2025-08-22 annual')">📅 Apply Leave</button>
+            <button onclick="tryExample('Log 8 hours on 2025-08-20 for PROJ001')">⏰ Log Hours</button>
+            <button onclick="tryExample('What is my leave balance?')">💰 Check Balance</button>
+            <button onclick="tryExample('Show my timesheet entries')">📋 List Entries</button>
+        </div>
+        
+        <h4>🎯 Prompt Examples</h4>
+        <div class="button-group">
+            <button onclick="tryExample('Generate a leave request email for John from 2025-09-01 to 2025-09-05')">📧 Leave Email</button>
+            <button onclick="tryExample('Create a timesheet reminder for Jane')">⏰ Timesheet Reminder</button>
+            <button onclick="tryExample('Show leave policy summary')">📖 Policy Summary</button>
+            <button onclick="tryExample('Analyze overtime patterns')">📊 Overtime Analysis</button>
+        </div>
+        
+        <h4>📚 Resource Examples</h4>
+        <div class="button-group">
+            <button onclick="tryExample('Show annual leave policy')">📋 Leave Policy</button>
+            <button onclick="tryExample('Get project codes list')">🏷️ Project Codes</button>
+            <button onclick="tryExample('Show timesheet best practices')">✅ Best Practices</button>
+            <button onclick="tryExample('Get team utilization report')">📈 Team Report</button>
+        </div>
+    </div>
+
+    <div class="section capabilities">
+        <h3>🎛️ MCP Capabilities</h3>
+        <p class="small">Click "Discover MCP Capabilities" to see all available tools, prompts, and resources from both servers.</p>
+        <div id="capabilities-display" style="display: none;">
+            <h4>🔧 Tools</h4>
+            <div id="tools-list" class="small"></div>
+            <h4>🎯 Prompts</h4>
+            <div id="prompts-list" class="small"></div>
+            <h4>📚 Resources</h4>
+            <div id="resources-list" class="small"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>📋 Response Log</h3>
+        <pre id="log">Ready to chat! Try one of the examples above or type your own message.</pre>
+    </div>
+
+    <script>
+        async function send() {
+            const employeeId = Number(employee.value) || null;
+            const message = text.value.trim();
+            
+            if (!message) {
+                log.textContent = "Please enter a message.";
+                return;
+            }
+            
+            log.textContent = "Sending...";
+            
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: message,
+                        employee_id: employeeId
+                    })
+                });
+                
+                const result = await response.json();
+                log.textContent = `Request: ${message}\nEmployee ID: ${employeeId || 'Not specified'}\n\n` + 
+                                JSON.stringify(result, null, 2);
+            } catch (error) {
+                log.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function discover() {
+            log.textContent = "Discovering MCP capabilities...";
+            
+            try {
+                const response = await fetch('/mcp/discover');
+                const capabilities = await response.json();
+                
+                // Display in the capabilities section
+                document.getElementById('capabilities-display').style.display = 'block';
+                
+                // Tools
+                const toolsList = document.getElementById('tools-list');
+                toolsList.innerHTML = '';
+                Object.entries(capabilities.tools).forEach(([server, tools]) => {
+                    const serverDiv = document.createElement('div');
+                    serverDiv.innerHTML = `<strong>${server.toUpperCase()}:</strong>`;
+                    tools.forEach(tool => {
+                        const toolDiv = document.createElement('div');
+                        toolDiv.innerHTML = `• ${tool.name}: ${tool.description}`;
+                        serverDiv.appendChild(toolDiv);
+                    });
+                    toolsList.appendChild(serverDiv);
+                });
+
+                // Prompts
+                const promptsList = document.getElementById('prompts-list');
+                promptsList.innerHTML = '';
+                Object.entries(capabilities.prompts).forEach(([server, prompts]) => {
+                    const serverDiv = document.createElement('div');
+                    serverDiv.innerHTML = `<strong>${server.toUpperCase()}:</strong>`;
+                    prompts.forEach(prompt => {
+                        const promptDiv = document.createElement('div');
+                        promptDiv.innerHTML = `• ${prompt.name}: ${prompt.description}`;
+                        serverDiv.appendChild(promptDiv);
+                    });
+                    promptsList.appendChild(serverDiv);
+                });
+
+                // Resources
+                const resourcesList = document.getElementById('resources-list');
+                resourcesList.innerHTML = '';
+                Object.entries(capabilities.resources).forEach(([server, resources]) => {
+                    const serverDiv = document.createElement('div');
+                    serverDiv.innerHTML = `<strong>${server.toUpperCase()}:</strong>`;
+                    resources.forEach(resource => {
+                        const resourceDiv = document.createElement('div');
+                        resourceDiv.innerHTML = `• ${resource.name}: ${resource.description}`;
+                        serverDiv.appendChild(resourceDiv);
+                    });
+                    resourcesList.appendChild(serverDiv);
+                });
+
+                log.textContent = `MCP Capabilities Discovered!\n\n` + 
+                                JSON.stringify(capabilities, null, 2);
+            } catch (error) {
+                log.textContent = `Error discovering capabilities: ${error.message}`;
+            }
+        }
+
+        function tryExample(exampleText) {
+            text.value = exampleText;
+            if (!employee.value) {
+                employee.value = "1"; // Default employee ID for examples
+            }
+        }
+
+        // Allow Enter key to send
+        document.getElementById('text').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                send();
+            }
+        });
+    </script>
+</body>
+</html>
