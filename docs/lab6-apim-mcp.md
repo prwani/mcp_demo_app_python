@@ -8,8 +8,8 @@ nav_order: 6
 You’ll create lightweight MCP server facades in Azure API Management that front the Leave and Timesheet APIs from Lab 1. This enables MCP-style Tools endpoints without deploying separate MCP app code.
 
 <div class="suffix-picker">
-  <label for="suffix-input"><strong>Enter your SUFFIX</strong> (e.g., 7859): </label>
-  <input id="suffix-input" type="text" placeholder="7859" style="width: 8em; margin-left: 0.5rem;" />
+  <label for="suffix-input"><strong>Enter your SUFFIX</strong> (e.g., 1234): </label>
+  <input id="suffix-input" type="text" placeholder="1234" style="width: 8em; margin-left: 0.5rem;" />
   <p style="margin-top: 0.5rem; font-size: 0.9em; color: #555;">This page substitutes <code>&lt;SUFFIX&gt;</code> in examples with your value.</p>
 </div>
 

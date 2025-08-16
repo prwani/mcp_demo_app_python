@@ -8,8 +8,8 @@ nav_order: 9
 You’ll connect the APIM-hosted MCP servers from Lab 6 to Microsoft 365 Copilot and validate tool execution end-to-end.
 
 <div class="suffix-picker">
-  <label for="suffix-input"><strong>Enter your SUFFIX</strong> (e.g., 7859): </label>
-  <input id="suffix-input" type="text" placeholder="7859" style="width: 8em; margin-left: 0.5rem;" />
+  <label for="suffix-input"><strong>Enter your SUFFIX</strong> (e.g., 1234): </label>
+  <input id="suffix-input" type="text" placeholder="1234" style="width: 8em; margin-left: 0.5rem;" />
   <p style="margin-top: 0.5rem; font-size: 0.9em; color: #555;">This page substitutes <code>&lt;SUFFIX&gt;</code> in examples with your value.</p>
 </div>
 

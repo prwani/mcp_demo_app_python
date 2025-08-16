@@ -8,8 +8,8 @@ nav_order: 7
 This lab shows how to use a VS Code extension that supports MCP servers to connect to the APIM-hosted MCP servers you built in Lab 6.
 
 <div class="suffix-picker">
-  <label for="suffix-input"><strong>Enter your SUFFIX</strong> (e.g., 7859): </label>
-  <input id="suffix-input" type="text" placeholder="7859" style="width: 8em; margin-left: 0.5rem;" />
+   <label for="suffix-input"><strong>Enter your SUFFIX</strong> (e.g., 1234): </label>
+   <input id="suffix-input" type="text" placeholder="1234" style="width: 8em; margin-left: 0.5rem;" />
   <p style="margin-top: 0.5rem; font-size: 0.9em; color: #555;">This page substitutes <code>&lt;SUFFIX&gt;</code> in examples with your value.</p>
 </div>
 
