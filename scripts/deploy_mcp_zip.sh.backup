@@ -4,13 +4,13 @@ set -uo pipefail
 
 # Deploy Leave MCP, Timesheet MCP, and Chat Client via Zip Deploy to Azure Web Apps
 # Usage:
-#   SUFFIX=7859 REGION=eastus2 ./scripts/deploy_mcp_zip.sh
+#   SUFFIX=1234 REGION=eastus2 ./scripts/deploy_mcp_zip.sh
 #
 # Optional (will be set if present): AOAI_ENDPOINT, AOAI_KEY, AOAI_API_VERSION, AOAI_DEPLOYMENT
 
 if [[ -z "${SUFFIX:-}" ]]; then
-  echo "Error: SUFFIX is required (e.g., 7859)" >&2
-  echo "Usage: SUFFIX=7859 $0" >&2
+  echo "Error: SUFFIX is required (e.g., 1234)" >&2
+  echo "Usage: SUFFIX=1234 $0" >&2
   exit 1
 fi
 

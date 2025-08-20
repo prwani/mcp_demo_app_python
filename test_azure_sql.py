@@ -15,7 +15,8 @@ def test_azure_sql():
     # Get connection details (update these with your actual values)
     server = input("Enter your Azure SQL server name (without .database.windows.net): ").strip()
     if not server:
-        server = "timesheet-sql-server-7859"  # default from Azure_setup.md
+        from os import getenv
+        server = f"timesheet-sql-server-{getenv('SUFFIX', '1234')}"  # default via SUFFIX or 1234
     
     database = input("Enter database name [timesheet_db]: ").strip()
     if not database:

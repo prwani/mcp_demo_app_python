@@ -5,10 +5,11 @@
 set -e
 
 # Configuration
-RESOURCE_GROUP="mcp-python-demo-rg-7859"
-APP_NAME="mcp-leave-api-7859"
+SUFFIX="${SUFFIX:-1234}"
+RESOURCE_GROUP="mcp-python-demo-rg-${SUFFIX}"
+APP_NAME="mcp-leave-api-${SUFFIX}"
 LOCATION="East US"
-APP_SERVICE_PLAN="mcp-leave-plan-7859"
+APP_SERVICE_PLAN="mcp-leave-plan-${SUFFIX}"
 
 echo "🚀 Deploying Leave App to Azure App Service (non-Docker)..."
 

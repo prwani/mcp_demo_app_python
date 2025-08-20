@@ -3,17 +3,18 @@
 # Run this script to update the connection strings with proper URL encoding
 
 # Set your Azure resource variables (update these to match your deployment)
-export RG="mcp-python-demo-rg-7859"           # e.g., "mcp-python-demo-rg-1234"
-export LEAVE_API_APP="mcp-leave-api-7859"      # e.g., "mcp-leave-api-1234"
-export TIMESHEET_API_APP="mcp-timesheet-api-7859"  # e.g., "mcp-timesheet-api-1234"
+export SUFFIX="${SUFFIX:-1234}"
+export RG="mcp-python-demo-rg-${SUFFIX}"           # e.g., "mcp-python-demo-rg-1234"
+export LEAVE_API_APP="mcp-leave-api-${SUFFIX}"      # e.g., "mcp-leave-api-1234"
+export TIMESHEET_API_APP="mcp-timesheet-api-${SUFFIX}"  # e.g., "mcp-timesheet-api-1234"
 
 # SQL Server details
-export LEAVE_SQL_SERVER="leave-sql-server-7859"      # Your actual server name
+export LEAVE_SQL_SERVER="leave-sql-server-${SUFFIX}"      # Your actual server name
 export LEAVE_SQL_DB="leave_db"
 export LEAVE_SQL_ADMIN="sqladminuser"
 export LEAVE_SQL_PASSWORD="CHANGE_ME_str0ngP@ss!"
 
-export TIMESHEET_SQL_SERVER="timesheet-sql-server-7859"  # Your actual server name
+export TIMESHEET_SQL_SERVER="timesheet-sql-server-${SUFFIX}"  # Your actual server name
 export TIMESHEET_SQL_DB="timesheet_db"
 export TIMESHEET_SQL_ADMIN="sqladminuser"
 export TIMESHEET_SQL_PASSWORD="CHANGE_ME_str0ngP@ss!"

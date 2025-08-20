@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # Deploy Leave API (non-Docker) to Azure Web App via Zip Deploy
 # Usage:
-#   SUFFIX=7859 ./scripts/deploy_leave_api_zip.sh
+#   SUFFIX=1234 ./scripts/deploy_leave_api_zip.sh
 # Optional: KEEP_ZIPS=1 to keep artifacts
 
 set -uo pipefail
 
 if [[ -z "${SUFFIX:-}" ]]; then
-  echo "Error: SUFFIX is required (e.g., 7859)" >&2
-  echo "Usage: SUFFIX=7859 $0" >&2
+  echo "Error: SUFFIX is required (e.g., 1234)" >&2
+  echo "Usage: SUFFIX=1234 $0" >&2
   exit 1
 fi
 

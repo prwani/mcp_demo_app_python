@@ -7,7 +7,9 @@ from urllib.parse import quote_plus
 
 def test_sqlalchemy_connection():
     # Connection details
-    server = "timesheet-sql-server-7859"
+    import os
+    suffix = os.getenv("SUFFIX", "1234")
+    server = f"timesheet-sql-server-{suffix}"
     database = "timesheet_db"
     username = "sqladminuser"
     password = "CHANGE_ME_str0ngP@ss!"

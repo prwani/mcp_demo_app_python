@@ -1,69 +1,68 @@
 ---
-title: Lab 2 — Leave MCP Server (Option 1)
+title: Lab 2 — Leave MCP Server v2 (Streamable HTTP)
 nav_order: 2
 ---
 
-# Lab 2 — Leave MCP Server
+# Lab 2 — Leave MCP Server v2
 
 <div class="suffix-picker">
   <label for="suffix-input"><strong>Enter your SUFFIX</strong> (e.g., 1234): </label>
   <input id="suffix-input" type="text" placeholder="1234" style="width: 8em; margin-left: 0.5rem;" />
-  <p style="margin-top: 0.5rem; font-size: 0.9em; color: #555;">Examples and curl commands on this page substitute <code>&lt;SUFFIX&gt;</code> with your value.</p>
+  <p style="margin-top: 0.5rem; font-size: 0.9em; color: #555;">Links on this page substitute <code>&lt;SUFFIX&gt;</code> with your value.</p>
 </div>
 
 <script src="./assets/suffix.js"></script>
 
-Concepts (from README)
-- Tools (Leave):
-  - `apply_leave` — POST `/mcp/tools/apply_leave` → proxies to Leave API `/employees/{id}/leave-requests`
-  - `get_balance` — GET `/mcp/tools/get_balance?employee_id=...` → proxies to Leave API `/employees/{id}/balance`
-- Prompts (Leave):
-  - `leave_request_email` — email template with optional reason
-  - `leave_policy_summary` — includes dynamic balance fetch
-  - `leave_calendar_planning` — planning guidance
-- Resources (Leave):
-  - Policies: `leave://policies/annual`, `leave://policies/sick`
-  - Forms: `leave://forms/application`
-  - Data: `leave://calendar/holidays`, `leave://reports/team-status`
-- Code: `leave_app/mcp_server/server.py`
+Concepts (v2)
+- Transport: HTTP (Streamable) MCP, consumed via MCP Inspector
+- Tools (Leave): `apply_leave`, `get_balance`
+- Prompts (Leave): `leave_application_template`, `leave_balance_inquiry`
+- Resources (Leave): `leave://policies`, `leave://employee/{employee_id}/applications`
+- Code: `leave_app/mcp_server_v2/server_mcp.py`
 
 Steps
-1) Package & deploy the Leave MCP server via `scripts/deploy_mcp_zip.sh`
-2) Configure it to call your Leave API via `LEAVE_API_URL`
-3) Validate `/mcp/health` and capability discovery
+1) Deploy the v2 server with the provided script
+2) Ensure `LEAVE_API_URL` points to your Leave API
+3) Connect using MCP Inspector (HTTP Streamable)
 
-What you’ll do next (details)
-- Creates `leave_mcp.zip` from `leave_app/` excluding API/web/sql
-- Sets `LEAVE_API_URL` to your Leave API URL
-- Sets port 8011 and startup script, deploys, restarts
+What you’ll do
+- Deploy only the minimal v2 server (no Docker)
+- App setting `LEAVE_API_URL` points to your Leave API
+- The server exposes an MCP Streamable HTTP endpoint at `/mcp`
 
-Commands
+Deploy command
 
-<pre><code class="language-bash" data-template="# Leave MCP only
-SUFFIX=&lt;SUFFIX&gt; ONLY_LEAVE=1 ./scripts/deploy_mcp_zip.sh
-"></code></pre>
+<pre><code class="language-bash" data-template="SUFFIX=&lt;SUFFIX&gt; ./scripts/deploy_leave_mcp_v2.sh"></code></pre>
 
-## Use MCP Inspector (optional)
-- Start MCP Inspector (Windows desktop app or WSL variant).
-- Add a server with the base URL:
-  - <span data-suffix-bind data-template="https://mcp-leave-mcp-<SUFFIX>.azurewebsites.net"></span>
-- Inspect capabilities:
-  - Tools: expect `apply_leave`, `get_balance` under `/mcp/tools/...`
-  - Prompts: see `/mcp/prompts/list` and prompt details
-  - Resources: browse `/mcp/resources/list` and read entries
+## Verify after deploy
+- In Azure Portal > App Service > Configuration, confirm `LEAVE_API_URL` is set and correct.
+- In App Service > Configuration > General settings, confirm Startup Command is `bash startup.sh`.
+- In App Service > Log stream, wait for lines showing dependency install and server start (port from `PORT` env var).
+- Open MCP Inspector and connect:
+  - Transport: HTTP (Streamable)
+  - URL: <span data-suffix-bind data-template="https://mcp-leave-mcp-v2-&lt;SUFFIX&gt;.azurewebsites.net/mcp"></span>
+  - Proxy Session Token: paste the token from MCP Inspector
+- In Inspector, verify:
+  - Tools: `apply_leave`, `get_balance` are listed
+  - Prompts: `leave_application_template`, `leave_balance_inquiry`
+  - Resources: `leave://policies`, `leave://employee/{id}/applications`
+- Try a tool: open `get_balance` details to see required params, then run with a test `employee_id`.
+
+## Use MCP Inspector
+- Start MCP Inspector.
+- Add a server:
+  - Transport: HTTP (Streamable)
+  - URL: <span data-suffix-bind data-template="https://mcp-leave-mcp-v2-&lt;SUFFIX&gt;.azurewebsites.net/mcp"></span>
+  - Proxy Session Token: paste the token printed by MCP Inspector
+- In the connection view, verify:
+  - Tools: `apply_leave`, `get_balance`
+  - Prompts: `leave_application_template`, `leave_balance_inquiry`
+  - Resources: `leave://policies`, `leave://employee/{id}/applications`
 
 Validate
-- Health: <span data-suffix-bind data-template="https://mcp-leave-mcp-<SUFFIX>.azurewebsites.net/mcp/health"></span>
-- Tools: <span data-suffix-bind data-template="https://mcp-leave-mcp-<SUFFIX>.azurewebsites.net/mcp/tools/list"></span>
-- Prompts: <span data-suffix-bind data-template="https://mcp-leave-mcp-<SUFFIX>.azurewebsites.net/mcp/prompts/list"></span>
-- Resources: <span data-suffix-bind data-template="https://mcp-leave-mcp-<SUFFIX>.azurewebsites.net/mcp/resources/list"></span>
+- Use MCP Inspector to list tools/prompts/resources and call tools.
+- Note: v2 is MCP-only; REST paths aren’t exposed for curl.
 
-Try it (curl)
-
-<pre><code class="language-bash" data-template="curl -s https://mcp-leave-mcp-<SUFFIX>.azurewebsites.net/mcp/tools/list | jq .
-curl -s https://mcp-leave-mcp-<SUFFIX>.azurewebsites.net/mcp/prompts/list | jq .
-curl -s https://mcp-leave-mcp-<SUFFIX>.azurewebsites.net/mcp/resources/list | jq .
-curl -s -X POST https://mcp-leave-mcp-<SUFFIX>.azurewebsites.net/mcp/tools/apply_leave \
-  -H 'Content-Type: application/json' \
-  -d '{"employee_id":1,"start_date":"2025-09-10","end_date":"2025-09-12","leave_type":"annual"}' | jq .
-"></code></pre>
+Troubleshooting
+- 404 when connecting? Ensure the URL ends with `/mcp`.
+- Cold starts: enable Always On in the Web App.

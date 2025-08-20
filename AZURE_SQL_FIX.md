@@ -1,7 +1,7 @@
 # Azure SQL Entra Authentication Setup
 
 ## Problem
-The Leave API web app (`mcp-leave-api-7859`) is failing to connect to Azure SQL because the database only allows Entra (Azure AD) based authentication, but the app is configured for username/password authentication.
+The Leave API web app (`mcp-leave-api-1234`) is failing to connect to Azure SQL because the database only allows Entra (Azure AD) based authentication, but the app is configured for username/password authentication.
 
 ## Root Cause
 The Azure SQL database has been configured to only allow Entra (Azure AD) authentication. This means:
@@ -27,9 +27,9 @@ This script will:
 ### Option 2: Manual Entra Setup via Azure CLI
 ```bash
 # Set your resource group and app name
-RESOURCE_GROUP="mcp-python-demo-rg-7859"
-APP_NAME="mcp-leave-api-7859"
-SQL_SERVER="leave-sql-server-7859"
+RESOURCE_GROUP="mcp-python-demo-rg-1234"
+APP_NAME="mcp-leave-api-1234"
+SQL_SERVER="leave-sql-server-1234"
 DATABASE="leave_db"
 
 # Enable managed identity
@@ -62,20 +62,20 @@ az webapp restart --name "$APP_NAME" --resource-group "$RESOURCE_GROUP"
 
 ### Option 3: Azure Portal Setup
 1. **Enable Managed Identity:**
-   - Go to Azure Portal → App Services → `mcp-leave-api-7859`
+    - Go to Azure Portal → App Services → `mcp-leave-api-1234`
    - Navigate to Identity → System assigned → Set Status to "On"
    - Note the Object (principal) ID
 
 2. **Configure SQL Server Azure AD Admin:**
-   - Go to Azure Portal → SQL servers → `leave-sql-server-7859`
+    - Go to Azure Portal → SQL servers → `leave-sql-server-1234`
    - Navigate to Azure Active Directory → Set admin
    - Add the web app's managed identity as admin
 
 3. **Update Connection String:**
-   - Go to App Services → `mcp-leave-api-7859` → Configuration
+    - Go to App Services → `mcp-leave-api-1234` → Configuration
    - Update `LEAVE_DATABASE_URL` to:
      ```
-     mssql+pyodbc://@leave-sql-server-7859.database.windows.net:1433/leave_db?driver=ODBC+Driver+18+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no&Connection+Timeout=30&Authentication=ActiveDirectoryMsi
+    mssql+pyodbc://@leave-sql-server-1234.database.windows.net:1433/leave_db?driver=ODBC+Driver+18+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no&Connection+Timeout=30&Authentication=ActiveDirectoryMsi
      ```
    - Add `LEAVE_USE_MANAGED_IDENTITY=true`
    - Save and restart the app
@@ -89,8 +89,8 @@ az webapp restart --name "$APP_NAME" --resource-group "$RESOURCE_GROUP"
 
 ## Verification
 After applying the Entra authentication setup:
-1. Check the logs: `az webapp log tail --name mcp-leave-api-7859 --resource-group mcp-python-demo-rg-7859`
-2. Test the API: `curl https://mcp-leave-api-7859.azurewebsites.net/health`
+1. Check the logs: `az webapp log tail --name mcp-leave-api-1234 --resource-group mcp-python-demo-rg-1234`
+2. Test the API: `curl https://mcp-leave-api-1234.azurewebsites.net/health`
 3. Look for "Database connection successful!" and "Using managed identity authentication" in the logs
 
 ## Prevention
@@ -107,7 +107,7 @@ To avoid authentication issues in Entra-only databases:
 
 ## Troubleshooting
 If you still see authentication errors:
-1. Verify the managed identity is enabled: `az webapp identity show --name mcp-leave-api-7859 --resource-group mcp-python-demo-rg-7859`
-2. Check if the identity is added as Azure AD admin: `az sql server ad-admin list --server leave-sql-server-7859 --resource-group mcp-python-demo-rg-7859`
+1. Verify the managed identity is enabled: `az webapp identity show --name mcp-leave-api-1234 --resource-group mcp-python-demo-rg-1234`
+2. Check if the identity is added as Azure AD admin: `az sql server ad-admin list --server leave-sql-server-1234 --resource-group mcp-python-demo-rg-1234`
 3. Ensure the connection string doesn't contain username/password
 4. Verify `Authentication=ActiveDirectoryMsi` is in the connection string

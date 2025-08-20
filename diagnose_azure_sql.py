@@ -15,7 +15,8 @@ def test_basic_connectivity():
     # Get server name from user
     server = input("Enter your Azure SQL server name (without .database.windows.net): ").strip()
     if not server:
-        server = "timesheet-sql-server-7859"  # default
+        from os import getenv
+        server = f"timesheet-sql-server-{getenv('SUFFIX', '1234')}"  # default via SUFFIX or 1234
     
     full_server = f"{server}.database.windows.net"
     port = 1433
@@ -128,9 +129,11 @@ def main():
         return
     
     # Test 3: Choose which database to test
+    from os import getenv
+    default_suffix = getenv("SUFFIX", "1234")
     print("\n🔍 Which database would you like to test?")
-    print("1. Timesheet database (timesheet-sql-server-7859, timesheet_db)")
-    print("2. Leave database (leave-sql-server-7859, leave_db)")
+    print(f"1. Timesheet database (timesheet-sql-server-{default_suffix}, timesheet_db)")
+    print(f"2. Leave database (leave-sql-server-{default_suffix}, leave_db)")
     print("3. Custom database")
     
     choice = input("Enter your choice (1/2/3) [1]: ").strip()
@@ -138,15 +141,15 @@ def main():
         choice = "1"
     
     if choice == "1":
-        server = "timesheet-sql-server-7859"
+        server = f"timesheet-sql-server-{default_suffix}"
         database = "timesheet_db"
     elif choice == "2":
-        server = "leave-sql-server-7859" 
+        server = f"leave-sql-server-{default_suffix}"
         database = "leave_db"
     else:
         server = input("Enter your Azure SQL server name (without .database.windows.net): ").strip()
         if not server:
-            server = "timesheet-sql-server-7859"
+            server = f"timesheet-sql-server-{default_suffix}"
         database = input("Enter database name: ").strip()
         if not database:
             database = "timesheet_db"

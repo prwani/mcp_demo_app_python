@@ -33,9 +33,9 @@ Since you've already completed the Azure deployment, you only need to **update a
 
 2. **Edit these variables in the script:**
    ```bash
-   export RG="your-actual-resource-group"              # e.g., "mcp-python-demo-rg-7859"
-   export LEAVE_API_APP="your-actual-leave-api-name"   # e.g., "mcp-leave-api-7859"
-   export TIMESHEET_API_APP="your-actual-timesheet-api-name"  # e.g., "mcp-timesheet-api-7859"
+   export RG="your-actual-resource-group"              # e.g., "mcp-python-demo-rg-1234"
+   export LEAVE_API_APP="your-actual-leave-api-name"   # e.g., "mcp-leave-api-1234"
+   export TIMESHEET_API_APP="your-actual-timesheet-api-name"  # e.g., "mcp-timesheet-api-1234"
    ```
 
 3. **Run the script:**
@@ -58,15 +58,15 @@ export TIMESHEET_API_APP="your-timesheet-api-app"
 ENCODED_LEAVE_PASSWORD=$(python3 -c "from urllib.parse import quote_plus; print(quote_plus('CHANGE_ME_str0ngP@ss!'))")
 ENCODED_TIMESHEET_PASSWORD=$(python3 -c "from urllib.parse import quote_plus; print(quote_plus('CHANGE_ME_str0ngP@ss!'))")
 
-LEAVE_DATABASE_URL="mssql+pyodbc://sqladminuser:${ENCODED_LEAVE_PASSWORD}@leave-sql-server-7859.database.windows.net:1433/leave_db?driver=ODBC+Driver+18+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no&LoginTimeout=30"
+LEAVE_DATABASE_URL="mssql+pyodbc://sqladminuser:${ENCODED_LEAVE_PASSWORD}@leave-sql-server-1234.database.windows.net:1433/leave_db?driver=ODBC+Driver+18+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no&LoginTimeout=30"
 
-TIMESHEET_DATABASE_URL="mssql+pyodbc://sqladminuser:${ENCODED_TIMESHEET_PASSWORD}@timesheet-sql-server-7859.database.windows.net:1433/timesheet_db?driver=ODBC+Driver+18+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no&LoginTimeout=30"
+TIMESHEET_DATABASE_URL="mssql+pyodbc://sqladminuser:${ENCODED_TIMESHEET_PASSWORD}@timesheet-sql-server-1234.database.windows.net:1433/timesheet_db?driver=ODBC+Driver+18+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no&LoginTimeout=30"
 
 # Option B (recommended since you enabled Managed Identity): use App Service Managed Identity
 # When using managed identity you should NOT include a username/password in the URL. Instead set
 # the connection string to the same DSN but without credentials and add the Authentication parameter.
 # Example:
-LEAVE_DATABASE_URL_MI="mssql+pyodbc://@leave-sql-server-7859.database.windows.net:1433/leave_db?driver=ODBC+Driver+18+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no&LoginTimeout=30&Authentication=ActiveDirectoryMsi"
+LEAVE_DATABASE_URL_MI="mssql+pyodbc://@leave-sql-server-1234.database.windows.net:1433/leave_db?driver=ODBC+Driver+18+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no&LoginTimeout=30&Authentication=ActiveDirectoryMsi"
 
 # Note: To make the Python app use managed identity set the following app setting as well:
 # LEAVE_USE_MANAGED_IDENTITY=1

@@ -7,7 +7,8 @@ import os
 from urllib.parse import urlparse, parse_qs
 
 # Test the connection string format we're using
-connection_string = "mssql+pyodbc://leave-sql-server-7859.database.windows.net:1433/leave_db?driver=ODBC+Driver+18+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no&Connection+Timeout=30&Authentication=ActiveDirectoryMsi"
+SUFFIX = os.getenv("SUFFIX", "1234")
+connection_string = f"mssql+pyodbc://leave-sql-server-{SUFFIX}.database.windows.net:1433/leave_db?driver=ODBC+Driver+18+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no&Connection+Timeout=30&Authentication=ActiveDirectoryMsi"
 
 print("🔍 Analyzing connection string:")
 print(f"Connection string: {connection_string}")

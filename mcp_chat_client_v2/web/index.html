@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>MCP Chat Client v2</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="container">
+      <h1>MCP Chat Client v2</h1>
+      <p class="subtitle">Ask leave or timesheet questions. The client auto-routes to the right MCP server/tool.</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card config-card">
+      <details>
+        <summary><strong>Azure OpenAI configuration (optional)</strong></summary>
+        <div class="grid-2">
+          <label for="aoai-endpoint">Endpoint</label>
+          <input id="aoai-endpoint" type="text" placeholder="https://your-resource.openai.azure.com" />
+
+          <label for="aoai-key">API Key</label>
+          <input id="aoai-key" type="password" placeholder="Azure OpenAI Key" />
+
+          <label for="aoai-version">API Version</label>
+          <input id="aoai-version" type="text" placeholder="2025-04-01-preview" />
+
+          <label for="aoai-deployment">Deployment</label>
+          <input id="aoai-deployment" type="text" placeholder="gpt-4o-mini" />
+        </div>
+        <div class="hint">Saved locally in your browser for convenience.</div>
+      </details>
+    </section>
+
+    <section class="card chat-card">
+      <div class="controls">
+        <div class="field">
+          <label for="employeeId">Employee ID (optional)</label>
+          <input id="employeeId" type="number" min="1" placeholder="e.g. 1" />
+        </div>
+        <div class="examples">
+          <span class="chip" data-example="check leave balance for employee 1">leave balance</span>
+          <span class="chip" data-example="apply leave from 2025-09-10 to 2025-09-12 for employee 1">apply leave</span>
+          <span class="chip" data-example="log 8 hours on 2025-09-10 for employee 1">log hours</span>
+          <span class="chip" data-example="timesheet summary 2025-09-01 to 2025-09-15 for employee 1">summary</span>
+          <span class="chip" data-example="project alpha hours 2025-09-01 to 2025-09-07">project hours</span>
+        </div>
+      </div>
+
+      <div class="composer">
+        <textarea id="msg" rows="3" placeholder="Type your question... (Ctrl/Cmd + Enter to send)"></textarea>
+        <button id="send" class="btn-primary">
+          <span class="btn-label">Send</span>
+          <span class="spinner" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <div id="log" class="chat-log" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer class="app-footer container">
+    <button id="show-capabilities" class="btn-link">View MCP capabilities</button>
+    <div id="capabilities" class="capabilities hidden"></div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

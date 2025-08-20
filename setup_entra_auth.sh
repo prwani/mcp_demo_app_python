@@ -6,9 +6,10 @@
 set -e
 
 # Configuration - Update these values to match your deployment
-RESOURCE_GROUP="mcp-python-demo-rg-7859"
-APP_NAME="mcp-leave-api-7859"
-SQL_SERVER="leave-sql-server-7859"
+SUFFIX="${SUFFIX:-1234}"
+RESOURCE_GROUP="mcp-python-demo-rg-${SUFFIX}"
+APP_NAME="mcp-leave-api-${SUFFIX}"
+SQL_SERVER="leave-sql-server-${SUFFIX}"
 DATABASE="leave_db"
 
 echo "🔧 Setting up Entra (Azure AD) Authentication for Leave API..."

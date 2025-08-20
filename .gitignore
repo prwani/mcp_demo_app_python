@@ -23,6 +23,7 @@ env/
 *.log
 *.zip
 LogFiles/
+cookies.txt
 
 # Local data (keep repo small; SQLite used in Option 1)
 data/**/*.db
