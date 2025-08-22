@@ -428,7 +428,7 @@ async def main():
     """Main entry point for the MCP server"""
     parser = argparse.ArgumentParser(description="Leave MCP Server v2")
     parser.add_argument("--transport", choices=["stdio", "sse"], default="stdio",
-                       help="Transport method (stdio for local, sse for web)")
+                       help="Transport method (stdio for local, sse/streamable-http for web)")
     parser.add_argument("--host", default="localhost", help="Host for SSE transport")
     parser.add_argument("--port", type=int, default=8003, help="Port for SSE transport")
     args = parser.parse_args()
@@ -437,9 +437,9 @@ async def main():
     server = LeaveMcpServer()
     
     if args.transport == "sse":
-        # SSE transport for web deployment
-        logger.info(f"Starting Leave MCP Server v2 with SSE transport on {args.host}:{args.port}")
-        transport = SseServerTransport(f"http://{args.host}:{args.port}/sse")
+        # Streamable HTTP transport for web deployment (endpoint exposed at /mcp)
+        logger.info(f"Starting Leave MCP Server v2 with streamable HTTP transport on {args.host}:{args.port}")
+        transport = SseServerTransport(f"http://{args.host}:{args.port}/mcp")
     else:
         # STDIO transport for local usage
         logger.info("Starting Leave MCP Server v2 with STDIO transport")

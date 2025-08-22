@@ -33,10 +33,12 @@ export PYTHONUNBUFFERED=1
 echo "Starting Leave MCP Server v2..."
 
 # Start server
-# Prefer the MCP-compliant FastMCP server which provides SSE (/sse) and streamable-http endpoints,
+# Prefer the MCP-compliant FastMCP server which provides a streamable HTTP endpoint (/mcp),
 # fall back to the FastAPI app (app.py) if server_mcp.py is unavailable.
 if [[ -f "server_mcp.py" ]]; then
 	echo "Launching MCP server (server_mcp.py) for protocol compliance and MCP Inspector support"
+	# Ensure MCP_TRANSPORT defaults to streamable-http for web deployments
+	export MCP_TRANSPORT=${MCP_TRANSPORT:-streamable-http}
 	python3 server_mcp.py
 elif [[ -f "app.py" ]]; then
 	echo "server_mcp.py not found, launching FastAPI app (app.py) with explicit /mcp routes"

@@ -45,7 +45,7 @@ class ResourceRequest(BaseModel):
 # Create FastAPI app
 app = FastAPI(
     title="Leave MCP Server v2",
-    description="MCP-compliant leave management server with SSE transport",
+    description="MCP-compliant leave management server with streamable HTTP transport",
     version="2.0.0"
 )
 
@@ -72,9 +72,9 @@ async def root():
         "name": "Leave MCP Server v2",
         "version": "2.0.0",
         "description": "MCP-compliant leave management server",
-        "transport": "SSE",
+        "transport": "streamable-http",
         "endpoints": {
-            "sse": "/sse",
+                "mcp": "/mcp",
             "health": "/health",
             "tools": "/mcp/tools/list",
             "prompts": "/mcp/prompts/list",
@@ -94,10 +94,10 @@ async def health_check():
         "leave_api_url": LEAVE_API_URL
     }
 
-@app.get("/sse")
-async def sse_endpoint(request: Request):
-    """SSE endpoint for MCP communication"""
-    logger.info("SSE connection established")
+@app.get("/mcp")
+async def mcp_endpoint(request: Request):
+    """Streamable HTTP endpoint for MCP communication"""
+    logger.info("MCP HTTP stream connection established")
     
     async def event_stream():
         try:

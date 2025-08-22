@@ -358,15 +358,18 @@ def main():
     logger.info(f"HTTP timeout: {HTTP_TIMEOUT}s")
     logger.info(f"Leave API URL: {LEAVE_API_URL}")
     logger.info(f"Server name: {mcp.name}")
-    transport_env = os.getenv("MCP_TRANSPORT", "sse").strip().lower()
-    transport: TransportType = "sse"
+    # Default to streamable-http to prefer HTTP stream endpoints in web deployments
+    transport_env = os.getenv("MCP_TRANSPORT", "streamable-http").strip().lower()
+    transport: TransportType = "streamable-http"
     if transport_env == "stdio":
         transport = "stdio"
     elif transport_env == "streamable-http":
         transport = "streamable-http"
-    elif transport_env != "sse":
-        logger.warning(f"Unknown MCP_TRANSPORT '{transport_env}', defaulting to 'sse'")
+    elif transport_env == "sse":
         transport = "sse"
+    else:
+        logger.warning(f"Unknown MCP_TRANSPORT '{transport_env}', defaulting to 'streamable-http'")
+        transport = "streamable-http"
     logger.info(f"MCP transport: {transport}")
 
     # Configure server settings
