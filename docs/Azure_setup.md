@@ -52,7 +52,7 @@ export AOAI_DEPLOYMENT="gpt-5"
 
 # Helpful derived values (set after resources exist)
 # Azure Deployment Setup (Common)
-
+```
 This guide covers the common prerequisites and Azure resources used by all four deployment options. After completing these, follow one of:
 
 - option_1_setup.md: SQLite + Zip Deploy (Web App runtime)
