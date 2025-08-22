@@ -1,0 +1,26 @@
+- title: Overview
+  url: /
+
+- title: Labs
+  items:
+    - title: Lab 1 — Deploy Leave & Timesheet APIs
+      url: /lab1
+    - title: Lab 2 — Leave MCP Server
+      url: /lab2-leave-mcp
+    - title: Lab 3 — Timesheet MCP Server
+      url: /lab3-timesheet-mcp
+    - title: Lab 4 — MCP Chat Client
+      url: /lab4-chat-client
+    - title: Lab 5 — Use VS Code with MCP Servers
+      url: /lab5-vscode-mcp
+    - title: Lab 6 — Build MCP servers with APIM
+      url: /lab6-apim-mcp
+    - title: Lab 7 — VS Code with APIM-hosted MCP Servers
+      url: /lab7-vscode-apim-mcp
+
+- title: References
+  items:
+    - title: MCP Workshop README
+      url: /index
+    - title: Azure setup
+      url: /Azure_setup
