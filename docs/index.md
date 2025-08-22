@@ -10,6 +10,9 @@ End-to-end hands-on to build and deploy an MCP solution on Azure using Option 1 
 - Lab 2: Deploy Leave MCP server
 - Lab 3: Deploy Timesheet MCP server
 - Lab 4: Deploy MCP chat client
+- Lab 5 : Use VS Code with Leave & Timesheet MCP servers
+- Lab 6 : Build MCP servers with Azure API Management  (from Lab 1 APIs)
+- Lab 7 : Use VS Code with APIM-hosted MCP servers
 
 You’ll first review core concepts for each lab, then run the exact commands (using the provided scripts). After completion, use the chat client UI to explore MCP Tools, Prompts, and Resources.
 
@@ -66,8 +69,6 @@ Use MCP Inspector to explore and validate MCP servers (browse Tools, Prompts, an
 - [Lab 5 — Use VS Code with Leave & Timesheet MCP servers](./lab5-vscode-mcp.md)
 - [Lab 6 — Build MCP servers with Azure API Management (from Lab 1 APIs)](./lab6-apim-mcp.md)
 - [Lab 7 — Use VS Code with APIM-hosted MCP servers](./lab7-vscode-apim-mcp.md)
-- [Lab 8 — Use Leave & Timesheet MCP in Microsoft 365 Copilot (Preview)](./lab8-m365-copilot.md)
-- [Lab 9 — Use APIM-based MCP in Microsoft 365 Copilot (Preview)](./lab9-m365-copilot-apim.md)
 
 ---
 
